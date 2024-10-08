@@ -1,38 +1,41 @@
-import http from 'http';
-import fs from 'fs';
+
+import express from 'express';  
+import dotenv from 'dotenv'
+import path from 'path';  
 import { fileURLToPath } from 'url';  
-import { dirname, join } from 'path';
+import { dirname } from 'path'; 
 
+dotenv.config()
+
+// Create an instance of Express  
+const app = express();  
+
+// Get the current filename and directory name  
 const __filename = fileURLToPath(import.meta.url);  
-const __dirname = dirname(__filename);
+const __dirname = dirname(__filename);  
 
-const server = http.createServer((req,res)=>{
-    let filePath;
+// Define the port  
+const port = process.env.PORT || 8080;  
 
-    switch(req.url){
-        case '/':
-            filePath = join(__dirname,'index.html');
-            break;
-        case '/about':
-            filePath = join(__dirname,'about.html');
-            break;
-        case '/contact':
-            filePath = join(__dirname, 'contact-me.html')
-            break;
-        default:
-            filePath = join(__dirname, '404.html')
-    }
+// Serve HTML files for different routes  
+app.get('/', (req, res) => {  
+    res.sendFile(path.join(__dirname, 'index.html'));  
+});  
 
-    fs.readFile(filePath, (err, data)=> {
-        if(err){
-            res.writeHead(404, {'Content-Type' : 'text/html'})
-            res.end(`<h1> Server Error </h1>`)
-        }
-        res.writeHead(200, {'Content-Type' : 'text/html'})
-        res.end(data)
-    })
-})
+app.get('/about', (req, res) => {  
+    res.sendFile(path.join(__dirname, 'about.html'));  
+});  
 
-server.listen(8080, ()=>{
-    console.log('server is running on port 8080')
-})
+app.get('/contact', (req, res) => {  
+    res.sendFile(path.join(__dirname, 'contact-me.html'));  
+});  
+
+// Handle 404 - Not Found  
+app.use((req, res) => {  
+    res.status(404).sendFile(path.join(__dirname, '404.html'));  
+});  
+
+// Start the server  
+app.listen(port, () => {  
+    console.log(`Server is running on http://localhost:${port}`);  
+});
